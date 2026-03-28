@@ -1,34 +1,75 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calorie Tracker</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="script.js" defer></script>
+    <title>Tracker Kalori</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #progress { width: 100%; background-color: #f3f3f3; }
+        #progress-bar { height: 30px; width: 0; background-color: #4caf50; }
+        #chartContainer { height: 370px; }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Calorie Tracker with Indonesian Food Database</h1>
-    </header>
-    <main>
-        <section id="tracker">
-            <h2>Daily Tracking</h2>
-            <input type="text" id="food-input" placeholder="Enter food name..." autocomplete="off" />
-            <button id="add-button">Add</button>
-            <progress id="progress-bar" value="0" max="100"></progress>
-            <div id="daily-log"></div>
-        </section>
-        <section id="weekly-chart">
-            <h2>Weekly Chart</h2>
-            <canvas id="chart"></canvas>
-        </section>
-        <section id="data-export">
-            <button id="export-button">Export Data</button>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2026 Calorie Tracker App</p>
-    </footer>
+    <h1>Tracker Kalori</h1>
+    <form id="calorie-form">
+        <input type="number" id="calories-input" placeholder="Kalori" required />
+        <input type="text" id="food-input" placeholder="Makanan" required />
+        <button type="submit">Tambah</button>
+    </form>
+    <h2>Progress Harian</h2>
+    <div id="progress"><div id="progress-bar"></div></div>
+    <h2>Chart Mingguan</h2>
+    <div id="chartContainer"></div>
+    <button id="export-btn">Ekspor Data</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let dailyCalories = 2000; // Target kalori harian
+        let currentCalories = 0;
+        let foodData = [];
+
+        document.getElementById('calorie-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            let calories = parseInt(document.getElementById('calories-input').value);
+            let food = document.getElementById('food-input').value;
+            foodData.push({food, calories});
+            currentCalories += calories;
+            updateProgressBar();
+            document.getElementById('calories-input').value = '';
+            document.getElementById('food-input').value = '';
+        });
+
+        function updateProgressBar() {
+            let progress = (currentCalories / dailyCalories) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+        }
+
+        // Chart.js integration
+        const ctx = document.getElementById('chartContainer').getContext('2d');
+        let chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: foodData.map(data => data.food),
+                datasets: [{
+                    label: 'Kalori',
+                    data: foodData.map(data => data.calories),
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                }]
+            },
+            options: { scales: { y: { beginAtZero: true } } }
+        });
+
+        document.getElementById('export-btn').addEventListener('click', function() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(foodData));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute('href', dataStr);
+            downloadAnchorNode.setAttribute('download', 'data.json');
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        });
+    </script>
 </body>
 </html>
