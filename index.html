@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calorie Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9e9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #ffcc00;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .food-input, .tracking-section {
+            margin: 20px 0;
+        }
+        input, button, select {
+            padding: 10px;
+            margin-top: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #ffcc00;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #e6b800;
+        }
+        .food-list {
+            list-style: none;
+            padding: 0;
+        }
+        .food-list-item {
+            margin: 5px 0;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Calorie Tracker</h1>
+        <div class="food-input">
+            <input type="text" id="foodName" placeholder="Enter food name" />
+            <input type="number" id="foodCalories" placeholder="Enter calories" />
+            <button id="addFood">Add Food</button>
+        </div>
+        <h2>My Food List</h2>
+        <ul id="foodList" class="food-list"></ul>
+        <h2>Daily Tracker</h2>
+        <div class="tracking-section">
+            <label for="todayCalories">Calories Today:</label>
+            <input type="number" id="todayCalories" value="0" readonly />
+            <button id="trackButton">Track Today's Calories</button>
+        </div>
+    </div>
+
+    <script>
+        const foodList = document.getElementById('foodList');
+        const addFoodButton = document.getElementById('addFood');
+        const todayCaloriesInput = document.getElementById('todayCalories');
+        let foodDatabase = JSON.parse(localStorage.getItem('foodDatabase')) || [];
+
+        function renderFoodList() {
+            foodList.innerHTML = '';
+            foodDatabase.forEach((food, index) => {
+                const li = document.createElement('li');
+                li.className = 'food-list-item';
+                li.innerHTML = `${food.name} - ${food.calories} calories <button onclick="removeFood(${index})">Remove</button>`;
+                foodList.appendChild(li);
+            });
+        }
+
+        function addFood() {
+            const foodName = document.getElementById('foodName').value;
+            const foodCalories = document.getElementById('foodCalories').value;
+            if (foodName && foodCalories) {
+                foodDatabase.push({ name: foodName, calories: parseInt(foodCalories) });
+                localStorage.setItem('foodDatabase', JSON.stringify(foodDatabase));
+                renderFoodList();
+                document.getElementById('foodName').value = '';
+                document.getElementById('foodCalories').value = '';
+            }
+        }
+
+        function removeFood(index) {
+            foodDatabase.splice(index, 1);
+            localStorage.setItem('foodDatabase', JSON.stringify(foodDatabase));
+            renderFoodList();
+        }
+
+        function trackCalories() {
+            const totalCalories = foodDatabase.reduce((total, food) => total + food.calories, 0);
+            todayCaloriesInput.value = totalCalories;
+        }
+
+        addFoodButton.addEventListener('click', addFood);
+        document.getElementById('trackButton').addEventListener('click', trackCalories);
+        document.addEventListener('DOMContentLoaded', renderFoodList);
+    </script>
+</body>
+</html>
